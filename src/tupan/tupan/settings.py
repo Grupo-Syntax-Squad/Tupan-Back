@@ -30,6 +30,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+TEST_RUNNER = 'pytest_django.runner.PytestTestRunner'
 
 # Application definition
 
