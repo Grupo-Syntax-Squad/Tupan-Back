@@ -1,18 +1,9 @@
-# TUPAN-BACK
-## Varáveis de ambiente
+# Base de conhecimento TUPAN-BACK
 
-Execute o seguinte comando para criar o .env
-```bash
-cp ./src/.env_sample ./src/.env
-```
-
-Logo em seguida altere as variáveis para os valores desejados.
-
-# Base de conhecimento
 
 ## Ambiente
 
-### Criar, ativar e instalar as dependencias doambiente virtual
+### Criar, ativar e instalar as dependencias do ambiente virtual
 ```sh
 python -m venv .venv
 ```
@@ -22,6 +13,13 @@ python -m venv .venv
 ```sh
 pip install -r .\requiments-dev.txt
 ```
+### Varáveis de ambiente
+
+Execute o seguinte comando para criar o .env
+```bash
+cp ./src/.env_sample ./src/.env
+```
+Logo em seguida altere as variáveis para os valores desejados.
 
 
 ## Testes
