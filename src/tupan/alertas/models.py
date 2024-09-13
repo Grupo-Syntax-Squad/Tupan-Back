@@ -29,10 +29,25 @@ class HistoricoAlerta(Base):
     alerta = models.ForeignKey(Alerta, related_name="historico_alertas", on_delete=models.CASCADE)
     timestamp_convertido = models.DateTimeField(blank=True, null=True)
 
+    class Meta:
+        verbose_name = "Histórico de Alerta"
+        verbose_name_plural = "Históricos de Alertas"
+
     def save(self, *args, **kwargs):
         self.timestamp_convertido = datetime.fromtimestamp(self.timestamp)
         super(HistoricoAlerta, self).save(*args, **kwargs)
 
+
+class Medicao(Base):
+    timestamp = models.BigIntegerField(blank=False)
+    timestamp_convertido = models.DateTimeField(blank=True, null=True)
+    dados = models.CharField(max_length=63, blank=False, null=False)
+# Falta a chave estrangeira estacao_parametro
+
     class Meta:
-        verbose_name = "Histórico de Alerta"
-        verbose_name_plural = "Históricos de Alertas"
+        verbose_name = "Medição"
+        verbose_name_plural = "Medições"
+
+    def save(self, *args, **kwargs):
+        self.timestamp_convertido = datetime.fromtimestamp(self.timestamp)
+        super(Medicao, self).save(*args, **kwargs)
