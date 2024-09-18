@@ -31,6 +31,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+AUTH_USER_MODEL = 'usuarios.Usuario'
+
 TEST_RUNNER = 'pytest_django.runner.PytestTestRunner'
 
 # Application definition
@@ -46,6 +48,7 @@ INSTALLED_APPS = [
     'alertas',
     'estacoes'
     'drf_spectacular',
+    'usuarios',
 ]
 
 REST_FRAMEWORK = {
