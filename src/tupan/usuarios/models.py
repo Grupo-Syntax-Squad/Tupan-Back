@@ -4,14 +4,6 @@ from django.core import validators
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 
-class Base(models.Model):
-    criacao = models.DateTimeField(auto_now_add=True)
-    alterado = models.DateTimeField(auto_now=True)
-    ativo = models.BooleanField(default=True)
-
-    class Meta:
-        abstract = True
-
 class UsuarioManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
         if not email:
@@ -27,7 +19,7 @@ class UsuarioManager(BaseUserManager):
         extra_fields.setdefault('is_staff', True)
         return self.create_user(email, password, **extra_fields)
 
-class Usuario(AbstractBaseUser):
+class Usuario(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(_('email address'), unique=True)
     password = models.CharField(_('password'), max_length=255)
     ativo = models.BooleanField(_('active'), default=True)
