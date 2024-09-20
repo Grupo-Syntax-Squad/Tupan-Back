@@ -10,7 +10,7 @@ class UsuarioList(APIView):
     Lista, cria, atualiza e deleta os usuários.
     """
     def get(self, request, format=None):
-        usuarios = Usuario.objects.all()
+        usuarios = Usuario.objects.all().filter(ativo=True)
         serializer = UsuarioSerializer(usuarios, many=True)
         return Response(serializer.data)
 
@@ -20,11 +20,13 @@ class UsuarioList(APIView):
             usuario = Usuario.objects.get(id=id_usuario)
             usuario.ativo = False
             usuario.save()
-            return Response(usuario, status=status.HTTP_200_OK)
+            serializer = UsuarioSerializer(usuario)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         except Usuario.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    
     def post(self, request, format=None):
         serializer = UsuarioSerializer(data=request.data)
         if serializer.is_valid():

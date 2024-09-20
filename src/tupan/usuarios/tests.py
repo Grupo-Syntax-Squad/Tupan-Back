@@ -27,3 +27,10 @@ class TestUsuario:
         assert len(usuarios) == 2
         assert user1 in usuarios
         assert user2 in usuarios
+    
+    @pytest.mark.django_db
+    def test_inativar_usuario(self):
+        user1 = Usuario.objects.create_user(email="wellingtonll.faria@gmail.com", password="123123")
+        user1.ativo = False
+        user1.save()
+        assert user1.ativo == False

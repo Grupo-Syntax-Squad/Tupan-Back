@@ -4,7 +4,7 @@ from usuarios.models import Usuario
 class UsuarioSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Usuario
-        fields = ['email', 'password', 'ativo', 'criacao', 'alterado']
+        fields = ['id', 'email', 'password', 'ativo', 'criacao', 'alterado']
         extra_kwargs = {'password': {'write_only': True}}
 
         def create(self, validated_data):
