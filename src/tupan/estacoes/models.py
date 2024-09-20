@@ -24,6 +24,8 @@ class Endereco(Base):
     numero = models.CharField(max_length=5)
     complemento = models.CharField(max_length=127)
     cep = models.CharField(max_length=8)
+    latitude = models.CharField(max_length=8)
+    longitude = models.CharField(max_length=8)
 
     class Meta:
         verbose_name = "Endereço"
@@ -34,7 +36,7 @@ class Endereco(Base):
     
 class Estacao(Base):
     nome = models.CharField(max_length=127)
-    Endereco = models.OneToOneField(Endereco, on_delete=models.CASCADE)
+    endereco = models.OneToOneField(Endereco, on_delete=models.CASCADE)
     topico = models.CharField(help_text="Tópico do broker MQTT", max_length=127)
     ativo = models.BooleanField(default=True)
     parametros = models.ManyToManyField(Parametro)
