@@ -4,4 +4,9 @@ from usuarios.models import Usuario
 class UsuarioSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Usuario
-        fields = ['user', 'email', 'ativo', 'criacao', 'alterado']
+        fields = ['email', 'password', 'ativo', 'criacao', 'alterado']
+        extra_kwargs = {'password': {'write_only': True}}
+
+        def create(self, validated_data):
+            user = Usuario.objects.create_user(**validated_data)
+            return user
