@@ -33,6 +33,8 @@ ALLOWED_HOSTS = []
 
 AUTH_USER_MODEL = 'usuarios.Usuario'
 
+LOGIN_URL = "/"
+
 TEST_RUNNER = 'pytest_django.runner.PytestTestRunner'
 
 # Application definition
