@@ -33,13 +33,13 @@ class Endereco(Base):
 
     def __str__(self):
         return self.cep
-    
+
 class Estacao(Base):
     nome = models.CharField(max_length=127)
-    endereco = models.OneToOneField(Endereco, on_delete=models.CASCADE)
+    endereco = models.OneToOneField(Endereco, null=True, on_delete=models.SET_NULL)
     topico = models.CharField(help_text="Tópico do broker MQTT", max_length=127)
     ativo = models.BooleanField(default=True)
-    parametros = models.ManyToManyField(Parametro)
+    parametros = models.ManyToManyField(Parametro, blank=True)
 
     class Meta:
         verbose_name = "Estação"
