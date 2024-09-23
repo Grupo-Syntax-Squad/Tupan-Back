@@ -34,12 +34,16 @@ class UsuarioList(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def update(self, request, format=None):
-        serializer = UsuarioSerializer(data=request.data)
-        if serializer.is_valid():
-            user = Usuario.get(id=serializer.data.id)
-            user.email = serializer.data.email
-            user.password = serializer.data.password
+    def put(self, request, format=None):
+        try:
+            new_data = request.data
+            user = Usuario.objects.get(id=new_data["id"])
+            user.email = new_data["email"]
+            user.password = new_data["password"]
             user.save()
-            return Response(user, status=status.HTTP_200_OK)
-        return Response("", status=status.HTTP_400_BAD_REQUEST)
+            serializer = UsuarioSerializer(user)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Usuario.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
