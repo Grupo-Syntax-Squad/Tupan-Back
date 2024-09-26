@@ -4,11 +4,21 @@ from django.http import Http404
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
 class UsuarioList(APIView):
     """
     Lista, cria, atualiza e deleta os usuários.
     """
+    def get_permissions(self):
+        if self.request.method in ['DELETE', 'PUT']:
+            self.permission_classes = [IsAuthenticated]
+        elif self.request.method == 'POST':
+            self.permission_classes = [AllowAny]
+        else:
+            self.permission_classes = [IsAuthenticated]
+        return super().get_permissions()
+    
     def get(self, request, format=None):
         usuarios = Usuario.objects.all().filter(ativo=True)
         serializer = UsuarioSerializer(usuarios, many=True)
