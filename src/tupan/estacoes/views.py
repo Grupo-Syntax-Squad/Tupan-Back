@@ -13,7 +13,7 @@ class EstacoesView(APIView):
         serializer = EstacaoSerializer(estacoes, many=True)
         return Response(serializer.data)
     def post(self, request, *args, **kwargs):
-        serializer = EstacaoSerializer(data=request.body)
+        serializer = EstacaoSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -32,7 +32,7 @@ class EstacoesDetalhesView(APIView):
             estacao = Estacao.objects.get(pk=pk)
         except Estacao.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
-        serializer = EstacaoSerializer(estacao, data=request.body)
+        serializer = EstacaoSerializer(estacao, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
