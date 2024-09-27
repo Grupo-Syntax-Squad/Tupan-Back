@@ -2,15 +2,38 @@ from rest_framework.views import APIView
 from django.http import JsonResponse
 import json
 from .models import Alerta, HistoricoAlerta, Medicao
+from django.core.exceptions import ValidationError
 
 
 class AlertasView(APIView):
     def get(self, request, *args, **kwargs):
         try:
-            alertas = Alerta.objects.filter(ativo=True).values()
+            # Obtém o valor do parâmetro 'ativo' da requisição, se disponível
+            ativo_param = request.GET.get('ativo', None)
+
+            if ativo_param is not None:
+                ativo_param = ativo_param.strip().lower()
+                if ativo_param == 'true':
+                    ativo = True
+                    alertas = Alerta.objects.filter(ativo=ativo).values()
+                elif ativo_param == 'false':
+                    ativo = False
+                    alertas = Alerta.objects.filter(ativo=ativo).values()
+                else:
+                    raise ValidationError('Parâmetro inválido para "ativo".')
+            else:
+                alertas = Alerta.objects.all().values()
+
             return JsonResponse(list(alertas), safe=False)
-        except:
-            return JsonResponse({'error': 'Erro ao buscar dados, tente novamente'}, status=500)
+
+        except ValidationError as ve:
+                return JsonResponse({'error': str(ve)}, status=400)
+
+        except Exception as e:
+            return JsonResponse({
+                'error': 'Erro ao buscar dados, tente novamente',
+                'data': f"{e}"
+            }, status=500)
 
     def post(self, request, *args, **kwargs):
         try:
