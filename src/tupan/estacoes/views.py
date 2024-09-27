@@ -2,112 +2,122 @@ from .models import Estacao, Parametro, Endereco
 from .serializers import EstacaoSerializer, EnderecoSerializer, ParametroSerializer
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.decorators import api_view
+from rest_framework.views import APIView
 
-@api_view(['GET', 'POST'])
-def estacao_list(request):
-    if request.method == 'GET':
+class EstacoesView(APIView):
+    def get(self, request, *args, **kwargs):
+        ativo = request.query_params.get('ativo')
         estacoes = Estacao.objects.all()
+        if (ativo):
+            estacoes = estacoes.filter(ativo=ativo)   
         serializer = EstacaoSerializer(estacoes, many=True)
         return Response(serializer.data)
-    elif request.method == 'POST':
+    def post(self, request, *args, **kwargs):
         serializer = EstacaoSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-@api_view(['GET', 'PUT', 'DELETE'])
-def estacao_details(request, pk):
-    try:
-        estacao = Estacao.objects.get(pk=pk)
-    except Estacao.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
-
-    if request.method == 'GET':
+    
+class EstacoesDetalhesView(APIView):
+    def get(self, request, pk, *args, **kwargs):
+        try:
+            estacao = Estacao.objects.get(pk=pk)
+        except Estacao.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
         serializer = EstacaoSerializer(estacao)
         return Response(serializer.data)
-
-    elif request.method == 'PUT':
+    def put(self, request, pk, *args, **kwargs):
+        try:
+            estacao = Estacao.objects.get(pk=pk)
+        except Estacao.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
         serializer = EstacaoSerializer(estacao, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    elif request.method == 'DELETE':
-        estacao.delete()
+    def delete(self, request, pk, *args, **kwargs):
+        try:
+            estacao = Estacao.objects.get(pk=pk)
+        except Estacao.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        estacao.ativo = False
+        estacao.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-@api_view(['GET', 'POST'])
-def endereco_list(request):
-    if request.method == 'GET':
+class EnderecosView(APIView):
+    def get(self, request, *args, **kwargs):
         enderecos = Endereco.objects.all()
         serializer = EnderecoSerializer(enderecos, many=True)
         return Response(serializer.data)
-    elif request.method == 'POST':
+    def post(self, request, *args, **kwargs):
         serializer = EnderecoSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['GET', 'PUT', 'DELETE'])
-def endereco_details(request, pk):
-    try:
-        endereco = Endereco.objects.get(pk=pk)
-    except Endereco.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
-
-    if request.method == 'GET':
+class EnderecosDetalhesView(APIView):
+    def get(self, request, pk, *args, **kwargs):
+        try:
+            endereco = Endereco.objects.get(pk=pk)
+        except Endereco.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
         serializer = EnderecoSerializer(endereco)
         return Response(serializer.data)
-
-    elif request.method == 'PUT':
+    def put(self, request, pk, *args, **kwargs):
+        try:
+            endereco = Endereco.objects.get(pk=pk)
+        except Endereco.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
         serializer = EnderecoSerializer(endereco, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    elif request.method == 'DELETE':
+    def delete(self, request, pk, *args, **kwargs):
+        try:
+            endereco = Endereco.objects.get(pk=pk)
+        except Endereco.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
         endereco.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_204_NO_CONTENT) 
 
-@api_view(['GET', 'POST'])
-def parametro_list(request):
-    if request.method == 'GET':
+class ParametrosView(APIView):
+    def get(self, request, *args, **kwargs):
         parametros = Parametro.objects.all()
         serializer = ParametroSerializer(parametros, many=True)
         return Response(serializer.data)
-    elif request.method == 'POST':
+    def post (self, request, *args, **kwargs):
         serializer = ParametroSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['GET', 'PUT', 'DELETE'])
-def parametro_details(request, pk):
-    try:
-        parametro = Parametro.objects.get(pk=pk)
-    except Parametro.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
-
-    if request.method == 'GET':
+class ParametrosDetalhesView(APIView):
+    def get(self, request, pk, *args, **kwargs):
+        try:
+            parametro = Parametro.objects.get(pk=pk)
+        except Parametro.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
         serializer = ParametroSerializer(parametro)
         return Response(serializer.data)
-
-    elif request.method == 'PUT':
+    def put(self, request, pk, *args, **kwargs):
+        try:
+            parametro = Parametro.objects.get(pk=pk)
+        except Parametro.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
         serializer = ParametroSerializer(parametro, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    elif request.method == 'DELETE':
+    def delete(self, request, pk, *args, **kwargs):
+        try:
+            parametro = Parametro.objects.get(pk=pk)
+        except Parametro.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
         parametro.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-

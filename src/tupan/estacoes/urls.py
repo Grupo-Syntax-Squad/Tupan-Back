@@ -1,11 +1,11 @@
 from django.urls import path
-from .views import estacao_list, estacao_details, parametro_list, parametro_details, endereco_list, endereco_details
+from .views import EstacoesView, EstacoesDetalhesView, EnderecosView, EnderecosDetalhesView, ParametrosView, ParametrosDetalhesView
 
 urlpatterns = [
-    path("estacoes", estacao_list, name="Estações"),
-    path("estacoes/<int:pk>", estacao_details, name="Estação"),
-    path("enderecos", endereco_list, name="Endereços"),
-    path("enderecos/<int:pk>", endereco_details, name="Endereço"),
-    path("parametros", parametro_list, name="Parâmetros"),
-    path("parametros/<int:pk>", parametro_details, name="parâmetro")    
+    path("estacoes", EstacoesView.as_view(), name="Estações"),
+    path("estacoes/<int:pk>", EstacoesDetalhesView.as_view(), name="Estação"),
+    path("enderecos", EnderecosView.as_view(), name="Endereços"),
+    path("enderecos/<int:pk>", EnderecosDetalhesView.as_view(), name="Endereço"),
+    path("parametros", ParametrosView.as_view(), name="Parâmetros"),
+    path("parametros/<int:pk>", ParametrosDetalhesView.as_view(), name="Parâmetro")    
 ]
