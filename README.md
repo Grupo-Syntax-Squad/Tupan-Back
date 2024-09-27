@@ -1,6 +1,5 @@
 # Base de conhecimento TUPAN-BACK
 
-
 ## Ambiente
 
 ### Criar, ativar e instalar as dependencias do ambiente virtual
@@ -21,6 +20,17 @@ cp ./src/.env_sample ./src/.env
 ```
 Logo em seguida altere as variáveis para os valores desejados.
 
+## Swagger
+
+### Gerando o schema para o swagger
+Execute o seguinte comando no terminal para gerar o .yml que será utilizado pelo swagger:
+```
+python ./src/tupan/manage.py spectacular --color --file schema.yml
+```
+
+### Como acessar o swagger
+Rode a aplicação e acesse o endpoint:
+> /api/schema/swagger-ui
 
 ## Testes
 
