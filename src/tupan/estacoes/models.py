@@ -36,7 +36,7 @@ class Endereco(Base):
 
 class Estacao(Base):
     nome = models.CharField(max_length=127)
-    endereco = models.OneToOneField(Endereco, null=True, on_delete=models.SET_NULL)
+    endereco = models.OneToOneField(Endereco, on_delete=models.CASCADE)
     topico = models.CharField(help_text="Tópico do broker MQTT", max_length=127)
     ativo = models.BooleanField(default=True)
     parametros = models.ManyToManyField(Parametro, blank=True)
