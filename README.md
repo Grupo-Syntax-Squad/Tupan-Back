@@ -10,7 +10,7 @@ python -m venv .venv
 .\.venv\Scripts\activate
 ```
 ```sh
-pip install -r .\requiments-dev.txt
+pip install -r .\requirements-dev.txt
 ```
 ### Varáveis de ambiente
 

@@ -11,8 +11,8 @@ class Base(models.Model):
 
 
 class Alerta(Base):
-    nome = models.CharField(help_text="nome do alerta", max_length=127, unique=True)
-    condicao = models.CharField(help_text="condição para o alerta acontecer", max_length=4)
+    nome = models.CharField(help_text="Nome do alerta", max_length=127, unique=True)
+    condicao = models.CharField(help_text="Condição para o alerta acontecer", max_length=4)
     ativo = models.BooleanField(default=True)
 # falta a chave estrangeira da estacao_parametro
 
@@ -25,9 +25,9 @@ class Alerta(Base):
 
 
 class HistoricoAlerta(Base):
-    timestamp = models.BigIntegerField(blank=False)
+    timestamp = models.BigIntegerField(help_text="Data/hora do alerta em timestamp" ,blank=False)
     alerta = models.ForeignKey(Alerta, related_name="historico_alertas", on_delete=models.CASCADE)
-    timestamp_convertido = models.DateTimeField(blank=True, null=True)
+    timestamp_convertido = models.DateTimeField(help_text="Data/hora do alerta em datetime", blank=True, null=True)
 
     class Meta:
         verbose_name = "Histórico de Alerta"
@@ -39,9 +39,9 @@ class HistoricoAlerta(Base):
 
 
 class Medicao(Base):
-    timestamp = models.BigIntegerField(blank=False)
-    timestamp_convertido = models.DateTimeField(blank=True, null=True)
-    dados = models.CharField(max_length=63, blank=False, null=False)
+    timestamp = models.BigIntegerField(help_text="Data/hora da medição em timestamp", blank=False)
+    timestamp_convertido = models.DateTimeField(help_text="Data/hora da medição em datetime", blank=True, null=True)
+    dados = models.CharField(help_text="Valor dos dados da medição", max_length=63, blank=False, null=False)
 # Falta a chave estrangeira estacao_parametro
 
     class Meta:

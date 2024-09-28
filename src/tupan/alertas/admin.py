@@ -17,6 +17,10 @@ class AlertaAdmin(admin.ModelAdmin):
         "ativo",
         "condicao",
     ]
+    readonly_fields = [
+        "criado",
+        "modificado"
+    ]
 
 
 @admin.register(HistoricoAlerta)
