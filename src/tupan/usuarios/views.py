@@ -34,14 +34,13 @@ class UsuarioList(APIView):
     @extend_schema(
             description="Deleta um usuário pelo seu id",
             parameters=[
-                OpenApiParameter("id", OpenApiTypes.INT, description="Id do usuário", required=True)
+                OpenApiParameter("pk", OpenApiTypes.INT, description="Id do usuário", required=True)
             ],
             responses={200: UsuarioSerializer, 404: OpenApiResponse(description="Usuário não encontrado"), 400: OpenApiResponse(description="Erro na requisição")}
     )
-    def delete(self, request, format=None):
+    def delete(self, pk):
         try:
-            id_usuario = request.data.get("id")
-            usuario = Usuario.objects.get(id=id_usuario)
+            usuario = Usuario.objects.get(pk=pk)
             usuario.ativo = False
             usuario.save()
             serializer = UsuarioSerializer(usuario)
@@ -56,7 +55,7 @@ class UsuarioList(APIView):
         request=UsuarioSerializer,
         responses={201: UsuarioSerializer, 400: OpenApiResponse(description="Erro na requisição")}
     )
-    def post(self, request, format=None):
+    def post(self, request):
         serializer = UsuarioSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -66,15 +65,15 @@ class UsuarioList(APIView):
     @extend_schema(
         description="Atualiza um usuário pelo seu id",
         parameters=[
-            OpenApiParameter("id", OpenApiTypes.INT, description="Id do usuário", required=True)
+            OpenApiParameter("pk", OpenApiTypes.INT, description="Id do usuário", required=True)
         ],
         request=UsuarioSerializer,
         responses={200: UsuarioSerializer, 404: OpenApiResponse(description="Usuário não encontrado"), 400: OpenApiResponse(description="Erro na requisição")}
     )
-    def put(self, request, id, format=None):
+    def put(self, request, pk):
         try:
             new_data = request.data
-            user = Usuario.objects.get(id)
+            user = Usuario.objects.get(pk=pk)
             user.email = new_data["email"]
             user.password = new_data["password"]
             user.save()
