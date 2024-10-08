@@ -71,6 +71,8 @@ class Estacao(Base):
         return self.nome
 
 
-class EstacaoParametro(Base):
+class EstacaoParametro(models.Model):
     estacao = models.ForeignKey(Estacao, on_delete=models.CASCADE)
     parametro = models.ForeignKey(Parametro, on_delete=models.CASCADE)
+    class Meta:
+        db_table = "estacoes_estacao_parametro"

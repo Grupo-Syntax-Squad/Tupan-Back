@@ -1,11 +1,15 @@
 from rest_framework.views import APIView
 from django.http import JsonResponse
 import json
+
+from estacoes.models import EstacaoParametro
+
 from .models import Alerta, HistoricoAlerta, Medicao
 from django.core.exceptions import ValidationError
 
 
 class AlertasView(APIView):
+        
     def get(self, request, *args, **kwargs):
         try:
             # Obtém o valor do parâmetro 'ativo' da requisição, se disponível
@@ -35,23 +39,30 @@ class AlertasView(APIView):
                 'data': f"{e}"
             }, status=500)
 
+
     def post(self, request, *args, **kwargs):
         try:
             data = json.loads(request.body)
             nome = data.get('nome')
             condicao = data.get('condicao')
+            ativo = data.get('ativo')
+
+            id_estacao = data.get('id_estacao')
+            id_parametro = data.get('id_parametro')
+            estacao_parametro = EstacaoParametro.objects.filter(estacao = id_estacao, parametro = id_parametro)
 
             if not nome or not condicao:
                 return JsonResponse({'error': 'Campos obrigatórios: nome, condicao'}, status=400)
 
-            alerta = Alerta(nome=nome, condicao=condicao)
+            alerta = Alerta(nome=nome, condicao=condicao, ativo=ativo, estacao_parametro=estacao_parametro)
             alerta.save()
 
             return JsonResponse({
                 'id': alerta.pk,
                 'nome': alerta.nome,
                 'condicao': alerta.condicao,
-                'ativo': alerta.ativo
+                'ativo': alerta.ativo,
+                'estacao_parametro': alerta.estacao_parametro
             }, status=201)
 
         except json.JSONDecodeError:
