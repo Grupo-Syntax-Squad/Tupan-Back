@@ -4,8 +4,14 @@ from django.core.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiResponse, OpenApiRequest, OpenApiTypes
 
 class EstacoesView(APIView):
+    @extend_schema(
+        responses={
+            200: OpenApiResponse(EstacaoSerializer(many=True))
+        }
+    )
     def get(self, request, *args, **kwargs):
         ativo = request.query_params.get('ativo')
         estacoes = Estacao.objects.all()
@@ -13,6 +19,13 @@ class EstacoesView(APIView):
             estacoes = estacoes.filter(ativo=ativo)   
         serializer = EstacaoSerializer(estacoes, many=True)
         return Response(serializer.data)
+    @extend_schema(
+            request=OpenApiRequest(EstacaoSerializer),
+            responses={
+                201: OpenApiResponse(EstacaoSerializer()),
+                400: OpenApiResponse(description="Erro na requisição")
+            }
+    )
     def post(self, request, *args, **kwargs):
         try:
             endereco_instance = Endereco.objects.get(id=request.data["endereco"])
@@ -40,6 +53,12 @@ class EstacoesView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 class EstacoesDetalhesView(APIView):
+    @extend_schema(
+        responses={
+            200: OpenApiResponse(EstacaoSerializer()),
+            404: OpenApiResponse(description="Estação não encontrada")
+        }
+    )
     def get(self, request, pk, *args, **kwargs):
         try:
             estacao = Estacao.objects.get(pk=pk)
@@ -47,6 +66,16 @@ class EstacoesDetalhesView(APIView):
             return Response(status=status.HTTP_404_NOT_FOUND)
         serializer = EstacaoSerializer(estacao)
         return Response(serializer.data)
+    
+    @extend_schema(
+        request=OpenApiRequest(EstacaoSerializer()),
+        responses={
+            200: OpenApiResponse(EstacaoSerializer()),
+            400: OpenApiResponse(description="Erro na requisição"),
+            404: OpenApiResponse(description="Estação não encontrada")
+        }
+            
+    )
     def put(self, request, pk, *args, **kwargs):
         try:
             estacao = Estacao.objects.get(pk=pk)
@@ -65,6 +94,12 @@ class EstacoesDetalhesView(APIView):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    @extend_schema(
+        responses={
+            204: OpenApiResponse(description="Estação deletada com sucesso"),
+            404: OpenApiResponse(description="Estação não encontrada")
+        }
+    )
     def delete(self, request, pk, *args, **kwargs):
         try:
             estacao = Estacao.objects.get(pk=pk)
@@ -75,10 +110,22 @@ class EstacoesDetalhesView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 class EnderecosView(APIView):
+    @extend_schema(
+        responses={
+            200: OpenApiResponse(EnderecoSerializer(many=True))
+        }
+    )
     def get(self, request, *args, **kwargs):
         enderecos = Endereco.objects.all()
         serializer = EnderecoSerializer(enderecos, many=True)
         return Response(serializer.data)
+    @extend_schema(
+        request=OpenApiRequest(EnderecoSerializer),
+        responses={
+            201: OpenApiResponse(EnderecoSerializer()), 
+            400: OpenApiResponse(description="Erro na requisição")
+        }
+    )
     def post(self, request, *args, **kwargs):
         serializer = EnderecoSerializer(data=request.data)
         if serializer.is_valid():
@@ -87,6 +134,12 @@ class EnderecosView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class EnderecosDetalhesView(APIView):
+    @extend_schema(
+        responses={
+            200: OpenApiResponse(EnderecoSerializer()), 
+            404: OpenApiResponse(description="Endereço não encontrado")
+        }
+    )
     def get(self, request, pk, *args, **kwargs):
         try:
             endereco = Endereco.objects.get(pk=pk)
@@ -94,6 +147,14 @@ class EnderecosDetalhesView(APIView):
             return Response(status=status.HTTP_404_NOT_FOUND)
         serializer = EnderecoSerializer(endereco)
         return Response(serializer.data)
+    @extend_schema(
+        request=OpenApiRequest(EnderecoSerializer),
+        responses={
+            200: OpenApiResponse(EnderecoSerializer()), 
+            404: OpenApiResponse(description="Endereço não encontrado"), 
+            400: OpenApiResponse(description="Erro na requisição")
+        }
+    )
     def put(self, request, pk, *args, **kwargs):
         try:
             endereco = Endereco.objects.get(pk=pk)
@@ -104,6 +165,12 @@ class EnderecosDetalhesView(APIView):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    @extend_schema(
+        responses={
+            204: OpenApiResponse(description="Endereço deletado com sucesso"), 
+            404: OpenApiResponse(description="Endereço não encontrado")
+        }
+    )
     def delete(self, request, pk, *args, **kwargs):
         try:
             endereco = Endereco.objects.get(pk=pk)
@@ -113,10 +180,22 @@ class EnderecosDetalhesView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT) 
 
 class ParametrosView(APIView):
+    @extend_schema(
+        responses={
+            200: OpenApiResponse(ParametroSerializer(many=True))
+        }
+    )
     def get(self, request, *args, **kwargs):
         parametros = Parametro.objects.all()
         serializer = ParametroSerializer(parametros, many=True)
         return Response(serializer.data)
+    @extend_schema(
+        request=OpenApiRequest(ParametroSerializer),
+        responses={
+            201: OpenApiResponse(ParametroSerializer()), 
+            400: OpenApiResponse(description="Erro na requisição")
+        }
+    )
     def post (self, request, *args, **kwargs):
         serializer = ParametroSerializer(data=request.data)
         if serializer.is_valid():
@@ -125,6 +204,12 @@ class ParametrosView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class ParametrosDetalhesView(APIView):
+    @extend_schema(
+        responses={
+            200: OpenApiResponse(ParametroSerializer()), 
+            404: OpenApiResponse(description="Parâmetro não encontrado")
+        }
+    )
     def get(self, request, pk, *args, **kwargs):
         try:
             parametro = Parametro.objects.get(pk=pk)
@@ -132,6 +217,14 @@ class ParametrosDetalhesView(APIView):
             return Response(status=status.HTTP_404_NOT_FOUND)
         serializer = ParametroSerializer(parametro)
         return Response(serializer.data)
+    @extend_schema(
+        request=OpenApiRequest(ParametroSerializer),
+        responses={
+            200: OpenApiResponse(ParametroSerializer()), 
+            404: OpenApiResponse(description="Parâmetro não encontrado"), 
+            400: OpenApiResponse(description="Erro na requisição")
+        }
+    )
     def put(self, request, pk, *args, **kwargs):
         try:
             parametro = Parametro.objects.get(pk=pk)
@@ -142,6 +235,12 @@ class ParametrosDetalhesView(APIView):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    @extend_schema(
+        responses={
+            204: OpenApiResponse(description="Parâmetro deletado com sucesso"), 
+            404: OpenApiResponse(description="Parâmetro não encontrado")
+        }
+    )
     def delete(self, request, pk, *args, **kwargs):
         try:
             parametro = Parametro.objects.get(pk=pk)
