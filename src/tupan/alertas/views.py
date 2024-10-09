@@ -1,9 +1,10 @@
 from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
 from django.http import JsonResponse
 import json
-
 from estacoes.models import EstacaoParametro
-
+from .serializers import AlertaSerializer
 from .models import Alerta, HistoricoAlerta, Medicao
 from django.core.exceptions import ValidationError
 
@@ -47,23 +48,17 @@ class AlertasView(APIView):
             condicao = data.get('condicao')
             ativo = data.get('ativo')
 
-            id_estacao = data.get('id_estacao')
-            id_parametro = data.get('id_parametro')
-            estacao_parametro = EstacaoParametro.objects.filter(estacao = id_estacao, parametro = id_parametro)
-
+            parametro_estacao = data.get('estacao_parametro')
+            estacao_parametro = EstacaoParametro.objects.get(estacao = parametro_estacao['estacao'], parametro = parametro_estacao['parametro'])
             if not nome or not condicao:
                 return JsonResponse({'error': 'Campos obrigatórios: nome, condicao'}, status=400)
 
             alerta = Alerta(nome=nome, condicao=condicao, ativo=ativo, estacao_parametro=estacao_parametro)
-            alerta.save()
-
-            return JsonResponse({
-                'id': alerta.pk,
-                'nome': alerta.nome,
-                'condicao': alerta.condicao,
-                'ativo': alerta.ativo,
-                'estacao_parametro': alerta.estacao_parametro
-            }, status=201)
+            serializer = AlertaSerializer(alerta, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Dados inválidos'}, status=400)

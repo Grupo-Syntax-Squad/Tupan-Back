@@ -15,7 +15,7 @@ class Alerta(Base):
     nome = models.CharField(help_text="Nome do alerta", max_length=127, unique=True)
     condicao = models.CharField(help_text="Condição para o alerta acontecer", max_length=4)
     ativo = models.BooleanField(default=True)
-    estacao_parametro = models.ForeignKey(EstacaoParametro, on_delete=models.CASCADE, default=1)
+    estacao_parametro = models.ForeignKey(EstacaoParametro, on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = "Alerta"
