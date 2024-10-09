@@ -5,9 +5,6 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
 
-
-
-
 class EstacoesView(APIView):
     def get(self, request, *args, **kwargs):
         ativo = request.query_params.get('ativo')
@@ -17,37 +14,28 @@ class EstacoesView(APIView):
         serializer = EstacaoSerializer(estacoes, many=True)
         return Response(serializer.data)
     def post(self, request, *args, **kwargs):
-
-        # Suponha que você tenha as instâncias já carregadas:
-        endereco_instance = Endereco.objects.get(id=request.data["endereco"])
-
-        # Criando uma nova Estacao
+        try:
+            endereco_instance = Endereco.objects.get(id=request.data["endereco"])
+        except Endereco.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        
         estacao_nome = request.data["nome"]
-
-        # Validando se o nome não está vazio
         if not estacao_nome:
             raise ValidationError("O nome da estação não pode ser vazio.")
-
-        estacao = Estacao(nome=estacao_nome, endereco=endereco_instance, topico=request.data["topico"])
-
-        # Antes de salvar, você pode verificar se a estação já existe
-        if Estacao.objects.filter(nome=estacao.nome).exists():
+        if Estacao.objects.filter(nome=estacao_nome).exists():
             raise ValidationError("Já existe uma estação com esse nome.")
-
-        # Salvar a estação
+        
+        estacao = Estacao(nome=estacao_nome, endereco=endereco_instance, topico=request.data["topico"])
         estacao.save()
 
-        # Adicionando parâmetros
-        parametro_instance = Parametro.objects.get(id=request.data["parametros"])
+        parametros = request.data["parametros"]
+        for p in parametros:
+            parametro = Parametro.objects.get(id=p)
+            estacao.parametros.add(parametro)
 
-        # Validando se o parâmetro existe
-        if not parametro_instance:
-            raise ValidationError("O parâmetro não existe.")
-
-        estacao.parametros.add(parametro_instance)
-        estacao.save()
-        serializer = EstacaoSerializer(data=request.data)
+        serializer = EstacaoSerializer(estacao, data=request.data)
         if serializer.is_valid():
+            serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
@@ -64,6 +52,14 @@ class EstacoesDetalhesView(APIView):
             estacao = Estacao.objects.get(pk=pk)
         except Estacao.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
+        
+        parametros = request.data["parametros"]
+        novosParametros = []
+        for p in parametros:
+            parametro = Parametro.objects.get(id=p)
+            novosParametros.append(parametro)
+        estacao.parametros.set(novosParametros)
+
         serializer = EstacaoSerializer(estacao, data=request.data)
         if serializer.is_valid():
             serializer.save()
