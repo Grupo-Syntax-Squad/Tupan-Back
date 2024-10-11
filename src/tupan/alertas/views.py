@@ -59,7 +59,6 @@ class AlertasView(APIView):
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Dados inválidos'}, status=400)
 
@@ -77,18 +76,13 @@ class AlertasDetalhesView(APIView):
 
     def put(self, request, id, *args, **kwargs):
         try:
-            data = json.loads(request.body)
             alerta = Alerta.objects.filter(id=id, ativo=True).first()
             if alerta:
-                alerta.nome = data.get('nome', alerta.nome)
-                alerta.condicao = data.get('condicao', alerta.condicao)
-                alerta.save()
-                return JsonResponse({
-                    'id': alerta.pk,
-                    'nome': alerta.nome,
-                    'condicao': alerta.condicao,
-                    'ativo': alerta.ativo
-                }, status=200)
+                serializer = AlertaSerializer(alerta, data=request.data)
+                if serializer.is_valid():
+                    serializer.save()
+                    return Response(serializer.data, status=status.HTTP_200_OK)
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
             else:
                 return JsonResponse({'error': 'Alerta não encontrado ou inativo'}, status=404)
         except json.JSONDecodeError:

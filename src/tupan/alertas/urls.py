@@ -3,7 +3,7 @@ from .views import AlertasView, AlertasDetalhesView, HistoricoAlertaView, Medica
 
 urlpatterns = [
     path('', AlertasView.as_view(), name='alertas'),
-    path('<int:id>', AlertasDetalhesView.as_view(), name='alertas-detalhes'),
+    path('/<int:id>', AlertasDetalhesView.as_view(), name='alertas-detalhes'),
     path('historicos', HistoricoAlertaView.as_view(), name='historico-alertas'),
     path('medicoes', MedicaoView.as_view(), name='medicoes'),
     path('medicoes/<int:id>', MedicaoDetalhesView.as_view(), name='medicoes-detalhes')
