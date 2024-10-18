@@ -1,5 +1,6 @@
 from django.db import models
 from datetime import datetime
+from estacoes.models import EstacaoParametro
 
 
 class Base(models.Model):
@@ -14,7 +15,7 @@ class Alerta(Base):
     nome = models.CharField(help_text="Nome do alerta", max_length=127, unique=True)
     condicao = models.CharField(help_text="Condição para o alerta acontecer", max_length=4)
     ativo = models.BooleanField(default=True)
-# falta a chave estrangeira da estacao_parametro
+    estacao_parametro = models.ForeignKey(EstacaoParametro, on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = "Alerta"
@@ -42,7 +43,7 @@ class Medicao(Base):
     timestamp = models.BigIntegerField(help_text="Data/hora da medição em timestamp", blank=False)
     timestamp_convertido = models.DateTimeField(help_text="Data/hora da medição em datetime", blank=True, null=True)
     dados = models.CharField(help_text="Valor dos dados da medição", max_length=63, blank=False, null=False)
-# Falta a chave estrangeira estacao_parametro
+    estacao_parametro = models.ForeignKey(EstacaoParametro, on_delete=models.CASCADE, default=1)
 
     class Meta:
         verbose_name = "Medição"

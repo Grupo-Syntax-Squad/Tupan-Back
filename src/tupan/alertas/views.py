@@ -1,11 +1,16 @@
 from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
 from django.http import JsonResponse
 import json
+from estacoes.models import EstacaoParametro
+from .serializers import AlertaSerializer
 from .models import Alerta, HistoricoAlerta, Medicao
 from django.core.exceptions import ValidationError
 
 
 class AlertasView(APIView):
+        
     def get(self, request, *args, **kwargs):
         try:
             # Obtém o valor do parâmetro 'ativo' da requisição, se disponível
@@ -35,25 +40,25 @@ class AlertasView(APIView):
                 'data': f"{e}"
             }, status=500)
 
+
     def post(self, request, *args, **kwargs):
         try:
             data = json.loads(request.body)
             nome = data.get('nome')
             condicao = data.get('condicao')
+            ativo = data.get('ativo')
 
+            parametro_estacao = data.get('estacao_parametro')
+            estacao_parametro = EstacaoParametro.objects.get(estacao = parametro_estacao['estacao'], parametro = parametro_estacao['parametro'])
             if not nome or not condicao:
                 return JsonResponse({'error': 'Campos obrigatórios: nome, condicao'}, status=400)
 
-            alerta = Alerta(nome=nome, condicao=condicao)
-            alerta.save()
-
-            return JsonResponse({
-                'id': alerta.pk,
-                'nome': alerta.nome,
-                'condicao': alerta.condicao,
-                'ativo': alerta.ativo
-            }, status=201)
-
+            alerta = Alerta(nome=nome, condicao=condicao, ativo=ativo, estacao_parametro=estacao_parametro)
+            serializer = AlertaSerializer(alerta, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Dados inválidos'}, status=400)
 
@@ -71,18 +76,13 @@ class AlertasDetalhesView(APIView):
 
     def put(self, request, id, *args, **kwargs):
         try:
-            data = json.loads(request.body)
             alerta = Alerta.objects.filter(id=id, ativo=True).first()
             if alerta:
-                alerta.nome = data.get('nome', alerta.nome)
-                alerta.condicao = data.get('condicao', alerta.condicao)
-                alerta.save()
-                return JsonResponse({
-                    'id': alerta.pk,
-                    'nome': alerta.nome,
-                    'condicao': alerta.condicao,
-                    'ativo': alerta.ativo
-                }, status=200)
+                serializer = AlertaSerializer(alerta, data=request.data)
+                if serializer.is_valid():
+                    serializer.save()
+                    return Response(serializer.data, status=status.HTTP_200_OK)
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
             else:
                 return JsonResponse({'error': 'Alerta não encontrado ou inativo'}, status=404)
         except json.JSONDecodeError:

@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Endereco, Estacao, Parametro
+from .models import Endereco, Estacao, Parametro, Categoria
 
 @admin.register(Parametro)
 class ParametroAdmin(admin.ModelAdmin):
@@ -8,7 +8,6 @@ class ParametroAdmin(admin.ModelAdmin):
         "nome",
         "fator",
         "offset",
-        "unidade",
         "nome_json",
         "criado",
         "modificado",
@@ -16,13 +15,25 @@ class ParametroAdmin(admin.ModelAdmin):
     list_filter = [
         "modificado",
         "nome",
-        "unidade",
         "criado"
     ]
     readonly_fields = [
         "criado",
         "modificado"
     ]
+
+
+@admin.register(Categoria)
+class CategoriaAdmin(admin.ModelAdmin):
+    list_display = [
+        "unidade",
+        "nome"
+    ]
+    list_filter = [
+        "unidade"
+    ]
+
+
 @admin.register(Endereco)
 class EnderecoAdmin(admin.ModelAdmin):
     list_display = [
