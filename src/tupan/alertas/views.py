@@ -4,7 +4,7 @@ from rest_framework import status
 from django.http import JsonResponse
 import json
 from estacoes.models import EstacaoParametro
-from .serializers import AlertaSerializer
+from .serializers import AlertaSerializer, MedicaoSerializer
 from .models import Alerta, HistoricoAlerta, Medicao
 from django.core.exceptions import ValidationError
 
@@ -141,19 +141,20 @@ class HistoricoAlertaView(APIView):
 class MedicaoView(APIView):
     def get(self, request, *args, **kwargs):
         try:
-            medicoes = Medicao.objects.get()
-            return JsonResponse(list(medicoes), safe=False)
-        except:
-            return JsonResponse({'error': 'Erro ao buscar dados, tente novamente'}, status=500)
+            medicoes = Medicao.objects.all()
+            if not medicoes.exists():
+                return Response({"mensagem": "Nenhuma medição cadastrada"}, status=status.HTTP_404_NOT_FOUND)
+            serializer = MedicaoSerializer(medicoes, many=True)
+            return Response(serializer.data)
+        except Exception as e:
+            return Response({'error': f'Erro ao buscar dados, tente novamente {e}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class MedicaoDetalhesView(APIView):
     def get(self, request, id, *args, **kwargs):
         try:
-            alerta = Medicao.objects.filter(id=id, ativo=True).values().first()
-            if alerta:
-                return JsonResponse(alerta, safe=False)
-            else:
-                return JsonResponse({'error': 'Medição não encontrada ou inativa'}, status=404)
-        except:
-            return JsonResponse({'error': 'Erro ao buscar dados, tente novamente'}, status=500)
+            medicao = Medicao.objects.get(pk=id)
+            serializer = MedicaoSerializer(medicao)
+            return Response(serializer.data, status=status.HTTP_302_FOUND)
+        except Alerta.DoesNotExist:
+            return Response({'error': 'Erro ao buscar dados, tente novamente'}, status=status.HTTP_404_NOT_FOUND)
