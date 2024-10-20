@@ -12,11 +12,14 @@ class EnderecoSerializer(serializers.ModelSerializer):
         fields = ('id', 'logradouro', 'bairro', 'cidade', 'estado', 'numero', 'complemento', 'cep', 'latitude', 'longitude', 'criado', 'modificado')
 
 class EstacaoSerializer(serializers.ModelSerializer):
+    endereco = EnderecoSerializer()
     class Meta:
         model = Estacao
         fields = ('id', 'nome', 'endereco', 'topico', 'ativo', 'parametros', 'criado', 'modificado')
 
 class EstacaoParametroSerializer(serializers.ModelSerializer):
+    estacao = EstacaoSerializer()
+    parametro = ParametroSerializer()
     class Meta:
         model = EstacaoParametro
         fields = ('id', 'estacao', 'parametro')
