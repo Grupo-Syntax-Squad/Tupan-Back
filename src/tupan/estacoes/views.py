@@ -19,6 +19,7 @@ class EstacoesView(APIView):
             estacoes = estacoes.filter(ativo=ativo)   
         serializer = EstacaoSerializer(estacoes, many=True)
         return Response(serializer.data)
+    
     @extend_schema(
             request=OpenApiRequest(EstacaoSerializer),
             responses={
@@ -94,6 +95,7 @@ class EstacoesDetalhesView(APIView):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
     @extend_schema(
         responses={
             204: OpenApiResponse(description="Estação deletada com sucesso"),
@@ -119,6 +121,7 @@ class EnderecosView(APIView):
         enderecos = Endereco.objects.all()
         serializer = EnderecoSerializer(enderecos, many=True)
         return Response(serializer.data)
+    
     @extend_schema(
         request=OpenApiRequest(EnderecoSerializer),
         responses={
@@ -147,6 +150,7 @@ class EnderecosDetalhesView(APIView):
             return Response(status=status.HTTP_404_NOT_FOUND)
         serializer = EnderecoSerializer(endereco)
         return Response(serializer.data)
+    
     @extend_schema(
         request=OpenApiRequest(EnderecoSerializer),
         responses={
@@ -165,6 +169,7 @@ class EnderecosDetalhesView(APIView):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
     @extend_schema(
         responses={
             204: OpenApiResponse(description="Endereço deletado com sucesso"), 
@@ -189,6 +194,7 @@ class ParametrosView(APIView):
         parametros = Parametro.objects.all()
         serializer = ParametroSerializer(parametros, many=True)
         return Response(serializer.data)
+    
     @extend_schema(
         request=OpenApiRequest(ParametroSerializer),
         responses={
@@ -217,6 +223,7 @@ class ParametrosDetalhesView(APIView):
             return Response(status=status.HTTP_404_NOT_FOUND)
         serializer = ParametroSerializer(parametro)
         return Response(serializer.data)
+    
     @extend_schema(
         request=OpenApiRequest(ParametroSerializer),
         responses={
@@ -235,6 +242,7 @@ class ParametrosDetalhesView(APIView):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
     @extend_schema(
         responses={
             204: OpenApiResponse(description="Parâmetro deletado com sucesso"), 
@@ -250,6 +258,13 @@ class ParametrosDetalhesView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 class CategoriasView(APIView):
+    @extend_schema(
+            request=OpenApiRequest(CategoriaSerializer),
+            responses={
+                201: OpenApiResponse(CategoriaSerializer),
+                400: OpenApiResponse(description="Erro ao cadastrar a categoria")
+            }
+    )
     def post (self, request, *args, **kwargs):
         serializer = CategoriaSerializer(data=request.data)
         if serializer.is_valid():

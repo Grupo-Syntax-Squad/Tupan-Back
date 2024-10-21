@@ -1,16 +1,22 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from drf_spectacular.utils import extend_schema, OpenApiRequest, OpenApiResponse
 from django.http import JsonResponse
 import json
 from estacoes.models import EstacaoParametro
-from .serializers import AlertaSerializer, MedicaoSerializer
+from .serializers import AlertaSerializer, MedicaoSerializer, HistoricoAlertaSerializer
 from .models import Alerta, HistoricoAlerta, Medicao
 from django.core.exceptions import ValidationError
 
 
 class AlertasView(APIView):
-        
+    @extend_schema(
+        responses={
+            200: OpenApiResponse(AlertaSerializer(many=True)),
+            400: OpenApiResponse(description="Parâmetro inválido para 'ativo'")
+        }
+    )
     def get(self, request, *args, **kwargs):
         try:
             # Obtém o valor do parâmetro 'ativo' da requisição, se disponível
@@ -40,7 +46,13 @@ class AlertasView(APIView):
                 'data': f"{e}"
             }, status=500)
 
-
+    @extend_schema(
+            request=OpenApiRequest(AlertaSerializer),
+            responses={
+                201: OpenApiResponse(AlertaSerializer),
+                400: OpenApiResponse(description="Erro ao cadastrar um novo alerta")
+            }
+    )
     def post(self, request, *args, **kwargs):
         try:
             data = json.loads(request.body)
@@ -64,6 +76,13 @@ class AlertasView(APIView):
 
 
 class AlertasDetalhesView(APIView):
+    @extend_schema(
+        responses={
+            200: OpenApiResponse(AlertaSerializer),
+            404: OpenApiResponse(description="Alerta não encontrado ou inativo"),
+            500: OpenApiResponse(description="Erro ao buscar dados, tente novamente")
+        }
+    )
     def get(self, request, id, *args, **kwargs):
         try:
             alerta = Alerta.objects.filter(id=id, ativo=True).values().first()
@@ -74,6 +93,15 @@ class AlertasDetalhesView(APIView):
         except:
             return JsonResponse({'error': 'Erro ao buscar dados, tente novamente'}, status=500)
 
+    @extend_schema(
+        request=OpenApiRequest(AlertaSerializer),
+        responses={
+            200: OpenApiResponse(AlertaSerializer),
+            400: OpenApiResponse(description="Erro ao atualizar o alerta"),
+            404: OpenApiResponse(description="Alerta não encontrado ou inativo"),
+            500: OpenApiResponse(description="Erro ao atualizar alerta, tente novamente")
+        }
+    )
     def put(self, request, id, *args, **kwargs):
         try:
             alerta = Alerta.objects.filter(id=id, ativo=True).first()
@@ -90,6 +118,13 @@ class AlertasDetalhesView(APIView):
         except:
             return JsonResponse({'error': 'Erro ao atualizar alerta, tente novamente'}, status=500)
 
+    @extend_schema(
+        responses={
+            200: OpenApiResponse(description="Alerta desativado com sucesso"),
+            404: OpenApiResponse(description="Alerta não encontrado"),
+            500: OpenApiResponse(description="Erro ao desativar alerta")
+        }     
+    )
     def delete(self, request, id, *args, **kwargs):
         try:
             alerta = Alerta.objects.filter(id=id).first()
@@ -104,6 +139,12 @@ class AlertasDetalhesView(APIView):
 
 
 class HistoricoAlertaView(APIView):
+    @extend_schema(
+        responses={
+            200: OpenApiResponse(HistoricoAlertaSerializer(many=True)),
+            500: OpenApiResponse("Erro ao buscar dados")
+        }
+    )
     def get(self, request, *args, **kwargs):
         try:
             historico = HistoricoAlerta.objects.get()
@@ -111,6 +152,15 @@ class HistoricoAlertaView(APIView):
         except:
             return JsonResponse({'error': 'Erro ao buscar dados, tente novamente'}, status=500)
 
+    @extend_schema(
+        request=OpenApiRequest(HistoricoAlertaSerializer),
+        responses={
+            200: OpenApiResponse(HistoricoAlertaSerializer),
+            400: OpenApiResponse(description="Campos obrigatórios: timestamp, alerta | Dados inválidos"),
+            404: OpenApiResponse(description="Alerta não encontrado"),
+            500: OpenApiResponse(description="Erro ao salvar histórico")
+        }
+    )
     def post(self, request, *args, **kwargs):
         try:
             data = json.loads(request.body)
@@ -139,18 +189,32 @@ class HistoricoAlertaView(APIView):
 
 
 class MedicaoView(APIView):
+    @extend_schema(
+        responses={
+            302: OpenApiResponse(MedicaoSerializer(many=True)),
+            404: OpenApiResponse(description="Nenhuma medição cadastrada"),
+            500: OpenApiResponse(description="Erro ao buscar dados")
+        }
+    )
     def get(self, request, *args, **kwargs):
         try:
             medicoes = Medicao.objects.all()
             if not medicoes.exists():
                 return Response({"mensagem": "Nenhuma medição cadastrada"}, status=status.HTTP_404_NOT_FOUND)
             serializer = MedicaoSerializer(medicoes, many=True)
-            return Response(serializer.data)
+            return Response(serializer.data, status=status.HTTP_302_FOUND)
         except Exception as e:
             return Response({'error': f'Erro ao buscar dados, tente novamente {e}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class MedicaoDetalhesView(APIView):
+    @extend_schema(
+        responses={
+            302: OpenApiResponse(MedicaoSerializer),
+            404: OpenApiResponse(description="Nenhuma medição cadastrada"),
+            500: OpenApiResponse(description="Erro ao buscar dados")
+        }
+    )
     def get(self, request, id, *args, **kwargs):
         try:
             medicao = Medicao.objects.get(pk=id)
