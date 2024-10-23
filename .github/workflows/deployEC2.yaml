@@ -25,6 +25,14 @@ jobs:
       - name: Create target directory on AWS instance
         run: |
           ssh ${{ env.SSH_OPTIONS }} 'mkdir -p /home/ubuntu/tupan-back/'
+
+      - name: Create .env file
+        run: |
+          echo "DB_USER=${{ secrets.DB_USERNAME }}" >> .env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+          echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
+          echo "DB_HOST=localhost" >> .env
+          echo "DB_PORT=5432" >> .env          
       
       - name: Transfer code to AWS instance
         run: |
