@@ -1,0 +1,43 @@
+name: Deploy to AWS EC2
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+env:
+  AWS_PRIVATE_KEY: ${{ secrets.KEYAWS }}
+  SSH_OPTIONS: '-o StrictHostKeyChecking=no -i key.pem ubuntu@98.80.44.121'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      
+      - name: Set permissions for private key
+        run: |
+          echo "${{ env.AWS_PRIVATE_KEY }}" > key.pem
+          chmod 600 key.pem
+
+      - name: Create target directory on AWS instance
+        run: |
+          ssh ${{ env.SSH_OPTIONS }} 'mkdir -p /home/ubuntu/tupan-back/'
+      
+      - name: Transfer code to AWS instance
+        run: |
+          scp -o StrictHostKeyChecking=no -i key.pem -r ./ ubuntu@98.80.44.121:/home/ubuntu/tupan-back
+      
+      - name: Stop running containers
+        run: |
+          ssh ${{ env.SSH_OPTIONS }} 'cd /home/ubuntu/tupan-back/ && sudo docker-compose down'
+      
+      - name: Run Docker Compose
+        run: |
+          ssh ${{ env.SSH_OPTIONS }} 'sudo docker-compose up'
+      
+      - name: Cleanup SSH key
+        run: |
+          rm -f key.pem

@@ -2,6 +2,7 @@ version: '3'
 
 services:
   web:
+    image: tupan-back
     build: .
     command: python src/tupan/manage.py runserver 0.0.0.0:8000
     volumes:
