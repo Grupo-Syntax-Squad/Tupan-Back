@@ -10,7 +10,7 @@ services:
       - "8000:8000"
     environment:
       - DEBUG=True
-      - DATABASE_URL=postgres://postgres:fatec@db:5432:/tupan
+      - DATABASE_URL=postgres://postgres:fatec@db:5432/tupan
     restart: always
   db:
     image: postgres
