@@ -15,6 +15,13 @@ COPY . /app/
 # Expôr a porta que o Django vai usar
 EXPOSE 8000
 
+# Criar um script de entrada
+COPY entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+
+# Comando para rodar o script de entrada
+CMD ["/app/entrypoint.sh"]
+
 # Comandos para rodar as migrações
 CMD ["python", "src/tupan/manage.py", "makemigrations"]
 CMD ["python", "src/tupan/manage.py", "migrate"]
