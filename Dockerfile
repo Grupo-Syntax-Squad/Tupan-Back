@@ -23,9 +23,3 @@ RUN chmod +x /app/entrypoint.sh
 # Comando para rodar o script de entrada
 CMD ["/app/entrypoint.sh"]
 
-# Comandos para rodar as migrações
-CMD ["python", "src/tupan/manage.py", "makemigrations"]
-CMD ["python", "src/tupan/manage.py", "migrate"]
-# Comando para rodar o servidor
-CMD ["python", "src/tupan/manage.py", "runserver", "0.0.0.0:8000"]
-
