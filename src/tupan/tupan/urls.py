@@ -23,11 +23,11 @@ from .views import CustomAuthToken
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('alertas', include('alertas.urls')),
+    path('', include('alertas.urls')),
     path('', include('estacoes.urls')),
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     path('api/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
-    path('usuarios/', include('usuarios.urls')),
-    path('api-token-auth/', CustomAuthToken.as_view(), name='api_token_auth'),
+    path('', include('usuarios.urls')),
+    path('api-token-auth', CustomAuthToken.as_view(), name='api_token_auth'),
 ]
