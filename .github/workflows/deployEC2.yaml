@@ -43,9 +43,13 @@ jobs:
         run: |
           rsync -av --delete --exclude='.git' --exclude='.github' --exclude='.husky' -e "ssh -o StrictHostKeyChecking=no -i key.pem" --rsync-path="sudo rsync" ./ ubuntu@98.80.44.121:/home/ubuntu/tupan-back      
 
+      - name: Build Docker Compose
+        run: |
+          ssh ${{ env.SSH_OPTIONS }} 'cd /home/ubuntu/tupan-back/ && sudo docker-compose build'
+
       - name: Run Docker Compose
         run: |
-          ssh ${{ env.SSH_OPTIONS }} 'cd /home/ubuntu/tupan-back/ && sudo docker-compose up'
+          ssh ${{ env.SSH_OPTIONS }} 'cd /home/ubuntu/tupan-back/ && sudo docker-compose up -d'
       
       - name: Cleanup SSH key
         run: |
