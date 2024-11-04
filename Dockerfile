@@ -5,6 +5,7 @@ WORKDIR /app
 
 # Copiar o arquivo de requisitos para o container
 COPY requirements.txt /app/
+COPY entrypoint.sh /app/
 
 # Instalar as dependências
 RUN pip install --upgrade pip && pip install -r requirements.txt
