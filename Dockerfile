@@ -3,6 +3,9 @@ FROM python:3.11
 # Definir o diretório de trabalho dentro do container
 WORKDIR /app
 
+# Instalar netcat
+RUN apt-get update && apt-get install -y netcat
+
 # Copiar o arquivo de requisitos para o container
 COPY requirements.txt /app/
 COPY entrypoint.sh /app/
