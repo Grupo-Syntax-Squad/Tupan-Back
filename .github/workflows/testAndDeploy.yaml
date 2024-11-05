@@ -15,7 +15,6 @@ jobs:
       max-parallel: 4
       matrix:
         python-version: [3.12]
-
     steps:
     - uses: actions/checkout@v4
 
@@ -58,7 +57,7 @@ jobs:
 
     - name: Run Tests
       run: |
-        pytest
+        cd src/tupan && pytest
 
     - name: Stop PostgreSQL container
       run: |
