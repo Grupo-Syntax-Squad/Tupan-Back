@@ -6,7 +6,7 @@ on:
       - '*'  # Rodar para qualquer push em qualquer branch
   pull_request:
     branches:
-      - main  # Não é necessário, mas se quiser pode manter para PRs para 'main'
+      - main
 
 jobs:
   # Job para rodar os testes
