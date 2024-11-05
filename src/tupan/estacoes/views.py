@@ -4,9 +4,16 @@ from django.core.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
-from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiResponse, OpenApiRequest, OpenApiTypes
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiResponse, OpenApiRequest, OpenApiType
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
 class EstacoesView(APIView):
+    def get_permissions(self):
+        if self.request.method in ["GET"]:
+            self.permission_classes = [AllowAny]
+        else:
+            self.permission_classes = [IsAuthenticated]
+        return super().get_permissions()
     @extend_schema(
         responses={
             200: OpenApiResponse(EstacaoSerializer(many=True))
@@ -54,6 +61,12 @@ class EstacoesView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 class EstacoesDetalhesView(APIView):
+    def get_permissions(self):
+        if self.request.method in ["GET"]:
+            self.permission_classes = [AllowAny]
+        else:
+            self.permission_classes = [IsAuthenticated]
+        return super().get_permissions()
     @extend_schema(
         responses={
             200: OpenApiResponse(EstacaoSerializer()),
@@ -112,6 +125,12 @@ class EstacoesDetalhesView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 class EnderecosView(APIView):
+    def get_permissions(self):
+        if self.request.method in ["GET"]:
+            self.permission_classes = [AllowAny]
+        else:
+            self.permission_classes = [IsAuthenticated]
+        return super().get_permissions()
     @extend_schema(
         responses={
             200: OpenApiResponse(EnderecoSerializer(many=True))
@@ -137,6 +156,12 @@ class EnderecosView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class EnderecosDetalhesView(APIView):
+    def get_permissions(self):
+        if self.request.method in ["GET"]:
+            self.permission_classes = [AllowAny]
+        else:
+            self.permission_classes = [IsAuthenticated]
+        return super().get_permissions()
     @extend_schema(
         responses={
             200: OpenApiResponse(EnderecoSerializer()), 
@@ -185,6 +210,12 @@ class EnderecosDetalhesView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT) 
 
 class ParametrosView(APIView):
+    def get_permissions(self):
+        if self.request.method in ["GET"]:
+            self.permission_classes = [AllowAny]
+        else:
+            self.permission_classes = [IsAuthenticated]
+        return super().get_permissions()
     @extend_schema(
         responses={
             200: OpenApiResponse(ParametroSerializer(many=True))
@@ -210,6 +241,12 @@ class ParametrosView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class ParametrosDetalhesView(APIView):
+    def get_permissions(self):
+        if self.request.method in ["GET"]:
+            self.permission_classes = [AllowAny]
+        else:
+            self.permission_classes = [IsAuthenticated]
+        return super().get_permissions()
     @extend_schema(
         responses={
             200: OpenApiResponse(ParametroSerializer()), 
@@ -258,6 +295,12 @@ class ParametrosDetalhesView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 class CategoriasView(APIView):
+    def get_permissions(self):
+        if self.request.method in ["GET"]:
+            self.permission_classes = [AllowAny]
+        else:
+            self.permission_classes = [IsAuthenticated]
+        return super().get_permissions()
     @extend_schema(
             request=OpenApiRequest(CategoriaSerializer),
             responses={

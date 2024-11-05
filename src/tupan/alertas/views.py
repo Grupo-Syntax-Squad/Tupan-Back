@@ -8,9 +8,16 @@ from estacoes.models import EstacaoParametro
 from .serializers import AlertaSerializer, MedicaoSerializer, HistoricoAlertaSerializer
 from .models import Alerta, HistoricoAlerta, Medicao
 from django.core.exceptions import ValidationError
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
 
 class AlertasView(APIView):
+    def get_permissions(self):
+        if self.request.method in ["GET"]:
+            self.permission_classes = [AllowAny]
+        else:
+            self.permission_classes = [IsAuthenticated]
+        return super().get_permissions()
     @extend_schema(
         responses={
             200: OpenApiResponse(AlertaSerializer(many=True)),
@@ -76,6 +83,12 @@ class AlertasView(APIView):
 
 
 class AlertasDetalhesView(APIView):
+    def get_permissions(self):
+        if self.request.method in ["GET"]:
+            self.permission_classes = [AllowAny]
+        else:
+            self.permission_classes = [IsAuthenticated]
+        return super().get_permissions()
     @extend_schema(
         responses={
             200: OpenApiResponse(AlertaSerializer),
@@ -139,6 +152,12 @@ class AlertasDetalhesView(APIView):
 
 
 class HistoricoAlertaView(APIView):
+    def get_permissions(self):
+        if self.request.method in ["GET"]:
+            self.permission_classes = [AllowAny]
+        else:
+            self.permission_classes = [IsAuthenticated]
+        return super().get_permissions()
     @extend_schema(
         responses={
             200: OpenApiResponse(HistoricoAlertaSerializer(many=True)),
@@ -189,6 +208,12 @@ class HistoricoAlertaView(APIView):
 
 
 class MedicaoView(APIView):
+    def get_permissions(self):
+        if self.request.method in ["GET"]:
+            self.permission_classes = [AllowAny]
+        else:
+            self.permission_classes = [IsAuthenticated]
+        return super().get_permissions()
     @extend_schema(
         responses={
             302: OpenApiResponse(MedicaoSerializer(many=True)),
@@ -208,6 +233,12 @@ class MedicaoView(APIView):
 
 
 class MedicaoDetalhesView(APIView):
+    def get_permissions(self):
+        if self.request.method in ["GET"]:
+            self.permission_classes = [AllowAny]
+        else:
+            self.permission_classes = [IsAuthenticated]
+        return super().get_permissions()
     @extend_schema(
         responses={
             302: OpenApiResponse(MedicaoSerializer),

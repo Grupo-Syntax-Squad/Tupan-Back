@@ -8,7 +8,7 @@ from drf_spectacular.utils import extend_schema, OpenApiResponse, OpenApiParamet
 
 class UsuariosView(APIView):
     def get_permissions(self):
-        if self.request.method == 'POST':
+        if self.request.method in ["POST", "GET"]:
             self.permission_classes = [AllowAny]
         else:
             self.permission_classes = [IsAuthenticated]
@@ -38,6 +38,12 @@ class UsuariosView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class UsuariosDetalhesView(APIView):
+    def get_permissions(self):
+        if self.request.method in ["POST", "GET"]:
+            self.permission_classes = [AllowAny]
+        else:
+            self.permission_classes = [IsAuthenticated]
+        return super().get_permissions()
     @extend_schema(
         description="Busca um usuário ativo pelo seu id",
         responses={
