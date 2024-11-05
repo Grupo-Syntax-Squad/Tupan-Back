@@ -3,10 +3,10 @@ name: Django CI & Deploy
 on:
   push:
     branches:
-      - '*'  # Trigger for push in any branch
+      - '*'  # Trigger on push to any branch
   pull_request:
     branches:
-      - main  # Trigger for pull request to main branch
+      - main  # Trigger on pull request to main branch
 
 jobs:
   # Job for running tests
@@ -16,17 +16,6 @@ jobs:
       max-parallel: 4
       matrix:
         python-version: [3.7, 3.8, 3.9]
-
-    services:
-      postgres:
-        image: postgres:13
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U ${{ secrets.DB_USERNAME }}"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
 
     steps:
     - uses: actions/checkout@v4
@@ -41,10 +30,16 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Wait for PostgreSQL to be ready
+    - name: Start PostgreSQL service
       run: |
-        until pg_isready -h localhost -p 5432 -U ${{ secrets.DB_USERNAME }}; do
-          echo "Waiting for PostgreSQL...";
+        docker run --name postgres-db -d \
+          -e POSTGRES_USER=${{ secrets.DB_USERNAME }} \
+          -e POSTGRES_PASSWORD=${{ secrets.DB_PASSWORD }} \
+          -e POSTGRES_DB=${{ secrets.DB_NAME }} \
+          -p 5432:5432 postgres:13
+        # Wait until PostgreSQL is ready
+        until docker exec postgres-db pg_isready -U ${{ secrets.DB_USERNAME }}; do
+          echo "Waiting for PostgreSQL to be ready...";
           sleep 5;
         done
 
@@ -56,6 +51,11 @@ jobs:
     - name: Run Tests
       run: |
         pytest
+
+    - name: Stop PostgreSQL container
+      run: |
+        docker stop postgres-db
+        docker rm postgres-db
 
   # Job for deploying to AWS EC2, only if the build job is successful
   deploy:
