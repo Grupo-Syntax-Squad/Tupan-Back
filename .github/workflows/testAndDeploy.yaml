@@ -44,8 +44,8 @@ jobs:
 
     - name: Apply Django Migrations
       run: |
-        python manage.py makemigrations
-        python manage.py migrate
+        python src/tupan/manage.py makemigrations
+        python src/tupan/manage.py migrate
 
     - name: Run Tests
       run: |
