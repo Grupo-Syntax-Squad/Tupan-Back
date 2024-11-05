@@ -3,13 +3,13 @@ name: Django CI & Deploy
 on:
   push:
     branches:
-      - '*'  # Rodar para qualquer push em qualquer branch
+      - '*'  # Trigger for push in any branch
   pull_request:
     branches:
-      - main
+      - main  # Trigger for pull request to main branch
 
 jobs:
-  # Job para rodar os testes
+  # Job for running tests
   build:
     runs-on: ubuntu-latest
     strategy:
@@ -20,10 +20,6 @@ jobs:
     services:
       postgres:
         image: postgres:13
-        env:
-          POSTGRES_USER: ${{ secrets.DB_USERNAME }}
-          POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          POSTGRES_DB: ${{ secrets.DB_NAME }}
         ports:
           - 5432:5432
         options: >-
@@ -31,13 +27,6 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-
-    env:
-      DB_USERNAME: ${{ secrets.DB_USERNAME }}
-      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-      DB_NAME: ${{ secrets.DB_NAME }}
-      DB_HOST: localhost
-      DB_PORT: 5432
 
     steps:
     - uses: actions/checkout@v4
@@ -52,9 +41,9 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Wait for PostgreSQL
+    - name: Wait for PostgreSQL to be ready
       run: |
-        until pg_isready -h ${{ env.DB_HOST }} -p ${{ env.DB_PORT }} -U ${{ secrets.DB_USERNAME }}; do
+        until pg_isready -h localhost -p 5432 -U ${{ secrets.DB_USERNAME }}; do
           echo "Waiting for PostgreSQL...";
           sleep 5;
         done
@@ -68,19 +57,19 @@ jobs:
       run: |
         pytest
 
-  # Job para fazer o deploy no AWS EC2, só é executado se o job de build for bem-sucedido
+  # Job for deploying to AWS EC2, only if the build job is successful
   deploy:
     runs-on: ubuntu-24.04
-    needs: build  # Este job só vai rodar se o job build for bem-sucedido
-    if: github.ref == 'refs/heads/main'  # Executa apenas no push para a branch main
+    needs: build  # This job will only run if the build job is successful
+    if: github.ref == 'refs/heads/main'  # Run only on push to the main branch
     env:
       AWS_PRIVATE_KEY: ${{ secrets.KEYAWS }}
       SSH_OPTIONS: '-o StrictHostKeyChecking=no -i key.pem ubuntu@98.80.44.121'
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
-      
+        uses: actions/checkout@v4
+
       - name: Set permissions for private key
         run: |
           echo "${{ env.AWS_PRIVATE_KEY }}" > key.pem
@@ -101,7 +90,7 @@ jobs:
           echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
           echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
           echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
-          echo "DB_PORT=${{ secrets.DB_PORT }}" >> .env       
+          echo "DB_PORT=${{ secrets.DB_PORT }}" >> .env
 
       - name: Transfer code to AWS instance
         run: |
@@ -110,7 +99,7 @@ jobs:
       - name: Set permissions for entrypoint
         run: |
           ssh ${{ env.SSH_OPTIONS }} 'cd /home/ubuntu/tupan-back/ && sudo chmod +x entrypoint.sh'
-          
+
       - name: Build Docker Compose
         run: |
           ssh ${{ env.SSH_OPTIONS }} 'cd /home/ubuntu/tupan-back/ && sudo docker-compose build'
@@ -118,7 +107,7 @@ jobs:
       - name: Run Docker Compose
         run: |
           ssh ${{ env.SSH_OPTIONS }} 'cd /home/ubuntu/tupan-back/ && sudo docker-compose up -d'
-      
+
       - name: Cleanup SSH key
         run: |
           rm -f key.pem
