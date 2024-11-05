@@ -9,7 +9,6 @@ on:
       - main  # Trigger on pull request to main branch
 
 jobs:
-  # Job for running tests
   build:
     runs-on: ubuntu-latest
     strategy:
