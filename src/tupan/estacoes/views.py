@@ -27,32 +27,39 @@ class EstacoesView(APIView):
                 400: OpenApiResponse(description="Erro na requisição")
             }
     )
+
     def post(self, request, *args, **kwargs):
-        try:
-            endereco_instance = Endereco.objects.get(id=request.data["endereco"])
-        except Endereco.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        
-        estacao_nome = request.data["nome"]
+        endereco_serializer = EnderecoSerializer(data=request.data["endereco"])
+        if endereco_serializer.is_valid():
+            endereco_salvo = endereco_serializer.save()
+        else:
+            return Response(endereco_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        estacao_nome = request.data.get("nome")
         if not estacao_nome:
+            endereco_salvo.delete()
             raise ValidationError("O nome da estação não pode ser vazio.")
-        if Estacao.objects.filter(nome=estacao_nome).exists():
-            raise ValidationError("Já existe uma estação com esse nome.")
-        
-        estacao = Estacao(nome=estacao_nome, endereco=endereco_instance, topico=request.data["topico"])
-        estacao.save()
 
-        parametros = request.data["parametros"]
-        for p in parametros:
-            parametro = Parametro.objects.get(id=p)
-            estacao.parametros.add(parametro)
+        try:
+            estacao = Estacao(nome=estacao_nome, endereco=endereco_salvo, topico=request.data["topico"])
+            estacao.save()
+        except Exception as e:
+            endereco_salvo.delete()
+            return Response({"erro": f"Erro ao criar estação: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
 
-        serializer = EstacaoSerializer(estacao, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+        parametros = request.data.get("parametros", [])
+        if parametros:
+            for p in parametros:
+                try:
+                    parametro = Parametro.objects.get(id=p)
+                    estacao.parametros.add(parametro)
+                except Parametro.DoesNotExist:
+                    return Response({"erro": f"Parâmetro com id {p} não encontrado"}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = EstacaoSerializer(estacao)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
 class EstacoesDetalhesView(APIView):
     @extend_schema(
         responses={

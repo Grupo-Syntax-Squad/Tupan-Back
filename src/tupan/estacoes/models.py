@@ -44,7 +44,7 @@ class Endereco(Base):
     cidade = models.CharField(max_length=127)
     estado = models.CharField(max_length=127)
     numero = models.CharField(max_length=5)
-    complemento = models.CharField(max_length=127)
+    complemento = models.CharField(max_length=127, blank=True, null=True)
     cep = models.CharField(max_length=8)
     latitude = models.CharField(max_length=8)
     longitude = models.CharField(max_length=8)
@@ -58,8 +58,8 @@ class Endereco(Base):
 
 
 class Estacao(Base):
-    nome = models.CharField(max_length=127)
-    endereco = models.OneToOneField(Endereco, on_delete=models.CASCADE)
+    nome = models.CharField(max_length=127, unique=True, null=False, blank=False)
+    endereco = models.OneToOneField(Endereco, on_delete=models.CASCADE, blank=False, null=False)
     topico = models.CharField(help_text="Tópico do broker MQTT", max_length=127)
     parametros = models.ManyToManyField(Parametro, blank=True, through='EstacaoParametro')
 

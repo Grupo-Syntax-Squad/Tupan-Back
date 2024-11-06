@@ -1,7 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from drf_spectacular.utils import extend_schema, OpenApiRequest, OpenApiResponse
+from drf_spectacular.utils import extend_schema, OpenApiRequest, OpenApiResponse, OpenApiParameter
 from django.http import JsonResponse
 import json
 from estacoes.models import EstacaoParametro
@@ -140,6 +140,10 @@ class AlertasDetalhesView(APIView):
 
 class HistoricoAlertaView(APIView):
     @extend_schema(
+        parameters=[
+            OpenApiParameter("timestamp", description="Timestamp para filtragem", required=False, type=str),
+            OpenApiParameter("estacao_id", description="ID da estação para filtragem", required=False, type=int)
+        ],
         responses={
             200: OpenApiResponse(HistoricoAlertaSerializer(many=True)),
             500: OpenApiResponse("Erro ao buscar dados")
@@ -147,10 +151,28 @@ class HistoricoAlertaView(APIView):
     )
     def get(self, request, *args, **kwargs):
         try:
-            historico = HistoricoAlerta.objects.get()
-            return JsonResponse(list(historico), safe=False)
-        except:
-            return JsonResponse({'error': 'Erro ao buscar dados, tente novamente'}, status=500)
+            timestamp = request.query_params.get("timestamp")
+            estacao_id = request.query_params.get("estacao_id")
+
+            historico = HistoricoAlerta.objects.select_related('alerta__estacao_parametro__estacao').all()
+
+            if timestamp:
+                historico = historico.filter(timestamp=timestamp)
+            if estacao_id:
+                historico = historico.filter(alerta__estacao_parametro__estacao__id=estacao_id)
+
+            resultado = [
+                {
+                    "id_historico_alerta": h.id,
+                    "timestamp": h.timestamp,
+                    "estacao": h.alerta.estacao_parametro.estacao
+                }
+                for h in historico
+            ]
+
+            return JsonResponse(resultado, safe=False)
+        except Exception as e:
+            return JsonResponse({'error': f'Erro ao buscar dados: {str(e)}'}, status=500)
 
     @extend_schema(
         request=OpenApiRequest(HistoricoAlertaSerializer),
