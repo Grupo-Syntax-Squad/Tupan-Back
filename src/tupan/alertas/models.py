@@ -25,20 +25,6 @@ class Alerta(Base):
         return self.nome
 
 
-class HistoricoAlerta(Base):
-    timestamp = models.BigIntegerField(help_text="Data/hora do alerta em timestamp" ,blank=False)
-    alerta = models.ForeignKey(Alerta, related_name="historico_alertas", on_delete=models.CASCADE)
-    timestamp_convertido = models.DateTimeField(help_text="Data/hora do alerta em datetime", blank=True, null=True)
-
-    class Meta:
-        verbose_name = "Histórico de Alerta"
-        verbose_name_plural = "Históricos de Alertas"
-
-    def save(self, *args, **kwargs):
-        self.timestamp_convertido = datetime.fromtimestamp(self.timestamp)
-        super(HistoricoAlerta, self).save(*args, **kwargs)
-
-
 class Medicao(Base):
     timestamp = models.BigIntegerField(help_text="Data/hora da medição em timestamp", blank=False)
     timestamp_convertido = models.DateTimeField(help_text="Data/hora da medição em datetime", blank=True, null=True)
@@ -52,3 +38,18 @@ class Medicao(Base):
     def save(self, *args, **kwargs):
         self.timestamp_convertido = datetime.fromtimestamp(self.timestamp)
         super(Medicao, self).save(*args, **kwargs)
+
+
+class HistoricoAlerta(Base):
+    timestamp = models.BigIntegerField(help_text="Data/hora do alerta em timestamp" ,blank=False)
+    alerta = models.ForeignKey(Alerta, related_name="historico_alertas", on_delete=models.CASCADE)
+    timestamp_convertido = models.DateTimeField(help_text="Data/hora do alerta em datetime", blank=True, null=True)
+    medicao = models.ForeignKey(Medicao, related_name="historico_alertas", on_delete=models.PROTECT, blank=True, null=True)
+
+    class Meta:
+        verbose_name = "Histórico de Alerta"
+        verbose_name_plural = "Históricos de Alertas"
+
+    def save(self, *args, **kwargs):
+        self.timestamp_convertido = datetime.fromtimestamp(self.timestamp)
+        super(HistoricoAlerta, self).save(*args, **kwargs)
