@@ -35,6 +35,9 @@ class Medicao(Base):
         verbose_name = "Medição"
         verbose_name_plural = "Medições"
 
+    def __str__(self) -> str:
+        return f"{self.dados} - {self.estacao_parametro}"
+
     def save(self, *args, **kwargs):
         self.timestamp_convertido = datetime.fromtimestamp(self.timestamp)
         super(Medicao, self).save(*args, **kwargs)

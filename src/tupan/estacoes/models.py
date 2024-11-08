@@ -76,3 +76,6 @@ class EstacaoParametro(models.Model):
     parametro = models.ForeignKey(Parametro, on_delete=models.CASCADE)
     class Meta:
         db_table = "estacoes_estacao_parametro"
+    
+    def __str__(self):
+        return f"{self.estacao.nome} - {self.parametro.nome}"

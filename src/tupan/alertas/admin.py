@@ -27,16 +27,20 @@ class AlertaAdmin(admin.ModelAdmin):
 class HistoricoAlertaAdmin(admin.ModelAdmin):
     list_display = [
         "alerta",
+        "medicao",
         "timestamp",
         "timestamp_convertido",
         "criado",
-        "modificado",
     ]
     list_filter = [
         "alerta",
         "modificado",
         "criado",
+    ]
+    readonly_fields = [
+        "criado",
         "timestamp_convertido",
+        "modificado"
     ]
 
 
@@ -45,12 +49,17 @@ class MedicaoAdmin(admin.ModelAdmin):
     list_display = [
         "dados",
         "timestamp",
+        "estacao_parametro",
         "timestamp_convertido",
         "criado",
-        "modificado",
     ]
     list_filter = [
-        "modificado",
+        "dados",
+        "timestamp_convertido",
+        "criado",
+    ]
+    readonly_fields = [
         "criado",
         "timestamp_convertido",
+        "modificado"
     ]
