@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Endereco, Estacao, Parametro, Categoria
+from .models import Endereco, Estacao, Parametro, Categoria, EstacaoParametro
 
 @admin.register(Parametro)
 class ParametroAdmin(admin.ModelAdmin):
@@ -57,6 +57,11 @@ class EnderecoAdmin(admin.ModelAdmin):
         "modificado"
     ]
 
+
+class EstacaoParametroInline(admin.TabularInline):
+    model = EstacaoParametro
+    extra = 1
+
 @admin.register(Estacao)
 class EstacaoAdmin(admin.ModelAdmin):
     list_display = [
@@ -76,6 +81,8 @@ class EstacaoAdmin(admin.ModelAdmin):
         "criado",
         "modificado"
     ]
+
+    inlines = [EstacaoParametroInline]
 
     def getParametros(self, obj):
         return ", ".join([parametro.nome for parametro in obj.parametros.all()])

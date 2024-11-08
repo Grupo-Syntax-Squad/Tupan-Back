@@ -141,6 +141,8 @@ class AlertasDetalhesView(APIView):
 class HistoricoAlertaView(APIView):
     @extend_schema(
         parameters=[
+            OpenApiParameter("timestamp_inicial", description="Timestamp inicial para filtragem", required=False, type=str),
+            OpenApiParameter("timestamp_final", description="Timestamp final para filtragem", required=False, type=str),
             OpenApiParameter("timestamp", description="Timestamp para filtragem", required=False, type=str),
             OpenApiParameter("estacao_id", description="ID da estação para filtragem", required=False, type=int)
         ],
@@ -151,63 +153,31 @@ class HistoricoAlertaView(APIView):
     )
     def get(self, request, *args, **kwargs):
         try:
+            timestamp_inicial = request.query_params.get("timestamp_inicial")
+            timestamp_final = request.query_params.get("timestamp_final")
             timestamp = request.query_params.get("timestamp")
             estacao_id = request.query_params.get("estacao_id")
 
             historico = HistoricoAlerta.objects.select_related('alerta__estacao_parametro__estacao').all()
 
+            if timestamp_inicial and timestamp_final:
+                historico = historico.filter(timestamp__range=[timestamp_inicial, timestamp_final])
+            elif timestamp_inicial:
+                historico = historico.filter(timestamp__gte=timestamp_inicial)
+            elif timestamp_final:
+                historico = historico.filter(timestamp__lte=timestamp_final)
+
             if timestamp:
                 historico = historico.filter(timestamp=timestamp)
+
             if estacao_id:
                 historico = historico.filter(alerta__estacao_parametro__estacao__id=estacao_id)
 
-            resultado = [
-                {
-                    "id_historico_alerta": h.id,
-                    "timestamp": h.timestamp,
-                    "estacao": h.alerta.estacao_parametro.estacao
-                }
-                for h in historico
-            ]
+            serializer = HistoricoAlertaSerializer(historico, many=True)
 
-            return JsonResponse(resultado, safe=False)
+            return JsonResponse(data=serializer.data, safe=False)
         except Exception as e:
             return JsonResponse({'error': f'Erro ao buscar dados: {str(e)}'}, status=500)
-
-    @extend_schema(
-        request=OpenApiRequest(HistoricoAlertaSerializer),
-        responses={
-            200: OpenApiResponse(HistoricoAlertaSerializer),
-            400: OpenApiResponse(description="Campos obrigatórios: timestamp, alerta | Dados inválidos"),
-            404: OpenApiResponse(description="Alerta não encontrado"),
-            500: OpenApiResponse(description="Erro ao salvar histórico")
-        }
-    )
-    def post(self, request, *args, **kwargs):
-        try:
-            data = json.loads(request.body)
-            timestamp = data.get('timestamp')
-            alerta_id = data.get('alerta')
-
-            if not timestamp or not alerta_id:
-                return JsonResponse({'error': 'Campos obrigatórios: timestamp, alerta'}, status=400)
-
-            alerta = Alerta.objects.get(pk=alerta_id)
-            hist = HistoricoAlerta(timestamp=timestamp, alerta=alerta)
-            hist.save()
-
-            return JsonResponse({
-                'id': hist.pk,
-                'timestamp': hist.timestamp,
-                'alerta': hist.alerta.pk,
-                'timestamp_convertido': hist.timestamp_convertido
-            }, status=201)
-        except Alerta.DoesNotExist:
-            return JsonResponse({'error': 'Alerta não encontrado'}, status=404)
-        except json.JSONDecodeError:
-            return JsonResponse({'error': 'Dados inválidos'}, status=400)
-        except Exception as e:
-            return JsonResponse({'error': f'Erro ao salvar histórico: {str(e)}'}, status=500)
 
 
 class MedicaoView(APIView):
