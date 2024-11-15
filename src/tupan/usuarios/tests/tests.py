@@ -1,6 +1,6 @@
 import json
 import pytest
-from .models import Usuario
+from ..models import Usuario
 from rest_framework.test import APIClient
 
 class TestUsuario:
