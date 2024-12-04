@@ -1,0 +1,60 @@
+name: Django Integration Tests
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: [3.12]
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v3
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements-dev.txt
+
+    - name: Start PostgreSQL service
+      run: |
+        docker run --name postgres-db -d \
+          -e POSTGRES_USER=${{ secrets.DB_USERNAME }} \
+          -e POSTGRES_PASSWORD=${{ secrets.DB_PASSWORD }} \
+          -e POSTGRES_DB=${{ secrets.DB_NAME }} \
+          -p 5432:5432 postgres:13
+        # Wait until PostgreSQL is ready
+        until docker exec postgres-db pg_isready -U ${{ secrets.DB_USERNAME }}; do
+          echo "Waiting for PostgreSQL to be ready...";
+          sleep 5;
+        done
+
+    - name: Create .env file
+      run: |
+        echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
+        echo "DB_USER=${{ secrets.DB_USERNAME }}" >> .env
+        echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+        echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
+        echo "DB_HOST=localhost" >> .env
+        echo "DB_PORT=5432" >> .env
+
+    - name: Apply Django Migrations
+      run: |
+        python src/tupan/manage.py makemigrations
+        python src/tupan/manage.py migrate
+
+    - name: Run Integration Tests
+      run: |
+        cd src/tupan/integration_tests && pytest
+
+    - name: Stop PostgreSQL container
+      run: |
+        docker stop postgres-db
+        docker rm postgres-db
