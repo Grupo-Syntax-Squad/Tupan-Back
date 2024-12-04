@@ -52,7 +52,7 @@ jobs:
 
     - name: Run Integration Tests
       run: |
-        cd src/tupan/integration_tests && pytest
+        cd src/tupan/tests/integration && pytest
 
     - name: Stop PostgreSQL container
       run: |
