@@ -5,7 +5,7 @@ from rest_framework.test import APIClient
 @pytest.mark.django_db
 def test_create_user():
     client = APIClient()
-    url = reverse('usuarios')
+    url = "http://localhost:8000/usuarios/"
     data = {
         "email": "test@example.com",
         "password": "password123"
